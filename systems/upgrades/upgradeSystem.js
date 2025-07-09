@@ -1,16 +1,22 @@
 import { getRandomUpgrades } from '../../config/upgrades.js';
+import { GAME_CONFIG } from '../../config/constants.js';
 
 export class UpgradeSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.modal = document.getElementById('upgradeModal');
         this.optionsContainer = document.getElementById('upgradeOptions');
+        this.playerIndicator = document.getElementById('upgradePlayerIndicator');
         this.onUpgradeSelected = null;
     }
     
     showUpgradeMenu() {
         const upgrades = getRandomUpgrades(3);
         this.optionsContainer.innerHTML = '';
+        
+        const currentPlayerId = this.gameState.currentPlayer;
+        this.playerIndicator.textContent = `Player ${currentPlayerId + 1}`;
+        this.playerIndicator.style.color = GAME_CONFIG.PLAYER.COLORS[currentPlayerId];
         
         upgrades.forEach(upgrade => {
             const button = document.createElement('button');
@@ -39,4 +45,3 @@ export class UpgradeSystem {
         }
     }
 }
-
