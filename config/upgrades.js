@@ -66,24 +66,25 @@ export const UPGRADE_TYPES = {
 
 export function getRandomUpgrades(count = 3) {
     const upgrades = Object.values(UPGRADE_TYPES);
-    const weightedUpgrades = [];
+    const selected = new Set(); // Use a Set to store unique upgrade objects
     
+    // Create a weighted pool for random selection
+    const weightedPool = [];
     upgrades.forEach(upgrade => {
         for (let i = 0; i < upgrade.weight; i++) {
-            weightedUpgrades.push(upgrade);
+            weightedPool.push(upgrade);
         }
     });
     
-    const selected = [];
-    for (let i = 0; i < count; i++) {
-        const randomIndex = Math.floor(Math.random() * weightedUpgrades.length);
-        const upgrade = weightedUpgrades[randomIndex];
+    // Keep selecting until we have 'count' unique upgrades
+    // Ensure that weightedPool is not empty to prevent an infinite loop if
+    // there aren't enough unique upgrades to pick from.
+    while (selected.size < count && weightedPool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * weightedPool.length);
+        const chosenUpgrade = weightedPool[randomIndex];
         
-        if (!selected.includes(upgrade)) {
-            selected.push(upgrade);
-        }
+        selected.add(chosenUpgrade); // Set naturally handles uniqueness
     }
     
-    return selected;
+    return Array.from(selected); // Convert the Set back to an Array
 }
-
