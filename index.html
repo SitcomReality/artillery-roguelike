@@ -95,13 +95,62 @@
         }
         
         #aimingInfo {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 5px;
             display: none;
+        }
+        
+        /* New aiming indicator styling */
+        .aim-indicator {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+        }
+        
+        .angle-indicator {
+            border: 2px solid rgba(255, 255, 0, 0.8);
+            border-radius: 50%;
+        }
+        
+        .angle-indicator::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50%;
+            height: 3px;
+            background: rgba(255, 255, 0, 0.9);
+            transform-origin: left center;
+            transform: rotate(0) translateY(-50%);
+        }
+        
+        .power-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .power-gauge {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #FFEB3B, #F44336);
+            width: 0%;
+            transition: width 0.1s ease-out;
+        }
+        
+        .player-status.player-active {
+            position: relative;
         }
     </style>
 </head>
@@ -126,6 +175,11 @@
             <h3>Choose an Upgrade</h3>
             <div id="upgradeOptions"></div>
         </div>
+        <!-- Add aiming indicators for each player -->
+        <div class="aim-indicator angle-indicator" id="p1Angle"></div>
+        <div class="aim-indicator power-indicator" id="p1Power"></div>
+        <div class="aim-indicator angle-indicator" id="p2Angle"></div>
+        <div class="aim-indicator power-indicator" id="p2Power"></div>
     </div>
 
     <script type="importmap">
@@ -141,4 +195,3 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
-

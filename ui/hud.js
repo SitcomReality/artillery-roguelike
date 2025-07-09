@@ -7,6 +7,16 @@ export class HUD {
         this.aimingInfoElement = document.getElementById('aimingInfo');
         this.aimAngleElement = document.getElementById('aimAngle');
         this.aimPowerElement = document.getElementById('aimPower');
+        
+        // Aiming indicators
+        this.p1Angle = document.getElementById('p1Angle');
+        this.p1Power = document.getElementById('p1Power');
+        this.p2Angle = document.getElementById('p2Angle');
+        this.p2Power = document.getElementById('p2Power');
+        this.powerFill = {
+            0: this.p1Power.querySelector('.power-fill'),
+            1: this.p2Power.querySelector('.power-fill')
+        };
     }
     
     updatePlayerStatus(gameState) {
@@ -18,14 +28,38 @@ export class HUD {
         this.p2StatusElement.classList.toggle('player-active', gameState.currentPlayer === 1);
     }
     
-    showAimingInfo(angle, power) {
-        this.aimAngleElement.textContent = Math.round(angle * 180 / Math.PI);
-        this.aimPowerElement.textContent = Math.round(power);
-        this.aimingInfoElement.style.display = 'block';
+    showAimingInfo(playerId, angle, power, playerX, playerY) {
+        const angleIndicator = playerId === 0 ? this.p1Angle : this.p2Angle;
+        const powerIndicator = playerId === 0 ? this.p1Power : this.p2Power;
+        
+        // Position indicators above the tank
+        const offsetX = playerId === 0 ? -40 : 40;
+        angleIndicator.style.display = 'block';
+        angleIndicator.style.left = `${playerX + offsetX}px`;
+        angleIndicator.style.top = `${playerY - 70}px`;
+        
+        powerIndicator.style.display = 'flex';
+        powerIndicator.style.left = `${playerX + offsetX}px`;
+        powerIndicator.style.top = `${playerY - 100}px`;
+        
+        // Create structure if not exists
+        if (!powerIndicator.querySelector('.power-gauge')) {
+            powerIndicator.innerHTML = '<div class="power-gauge"><div class="power-fill"></div></div><div>POWER</div>';
+            this.powerFill[playerId] = powerIndicator.querySelector('.power-fill');
+        }
+        
+        // Update gauge
+        this.powerFill[playerId].style.width = `${power}%`;
+        
+        // Rotate angle indicator
+        const angleDeg = angle * 180 / Math.PI;
+        angleIndicator.querySelector('::after').style.transform = `rotate(${angleDeg}deg) translateY(-50%)`;
     }
     
     hideAimingInfo() {
-        this.aimingInfoElement.style.display = 'none';
+        this.p1Angle.style.display = 'none';
+        this.p1Power.style.display = 'none';
+        this.p2Angle.style.display = 'none';
+        this.p2Power.style.display = 'none';
     }
 }
-

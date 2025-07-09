@@ -47,7 +47,15 @@ class Game {
                 const power = Math.min(100, Math.sqrt(data.deltaX * data.deltaX + data.deltaY * data.deltaY) * 2);
                 
                 this.currentAim = { angle, power };
-                this.hud.showAimingInfo(angle, power);
+                
+                // Pass player ID and position
+                this.hud.showAimingInfo(
+                    this.gameState.currentPlayer,
+                    angle, 
+                    power,
+                    player.x,
+                    player.y
+                );
             }
         });
         
@@ -237,4 +245,3 @@ class Game {
 
 // Start the game
 new Game();
-
