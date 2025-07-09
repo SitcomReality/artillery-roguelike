@@ -28,7 +28,6 @@ export const GAME_CONFIG = {
     
     UI: {
         AIM_LINE_LENGTH: 100,
-        POWER_SCALE: 0.1
+        POWER_SCALE: 0.3
     }
 };
-
