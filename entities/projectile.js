@@ -11,10 +11,13 @@ export class Projectile {
         this.trail = [];
         this.active = true;
         this.drillDistance = 0;
+        this.age = 0; // Age in frames
     }
     
     update() {
         if (!this.active) return;
+        
+        this.age++;
         
         // Store trail position
         this.trail.push({ x: this.x, y: this.y });
@@ -46,6 +49,11 @@ export class Projectile {
         
         // Check player collision
         for (const player of players) {
+            // Don't collide with owner for the first few frames
+            if (player.id === this.owner && this.age < 10) {
+                continue;
+            }
+
             const dx = this.x - player.x;
             const dy = this.y - player.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -69,4 +77,3 @@ export class Projectile {
         };
     }
 }
-
