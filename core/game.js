@@ -79,31 +79,50 @@ class Game {
     
     fire() {
         const player = this.players[this.gameState.currentPlayer];
-        const upgrades = this.gameState.getCurrentPlayer().upgrades;
+        const playerState = this.gameState.getCurrentPlayer();
+        const upgrades = playerState.upgrades;
         
+        const isSpecialShot = upgrades.grapple || upgrades.teleport;
+
         const velocity = this.currentAim.power * GAME_CONFIG.UI.POWER_SCALE;
         const vx = Math.cos(this.currentAim.angle) * velocity;
         const vy = Math.sin(this.currentAim.angle) * velocity;
         
-        // Create projectile(s)
-        const projectileCount = upgrades.multiShot || 1;
-        
-        for (let i = 0; i < projectileCount; i++) {
-            const spread = projectileCount > 1 ? (i - (projectileCount - 1) / 2) * 0.1 : 0;
-            const adjustedAngle = this.currentAim.angle + spread;
-            const adjustedVx = Math.cos(adjustedAngle) * velocity;
-            const adjustedVy = Math.sin(adjustedAngle) * velocity;
-            
+        if (isSpecialShot) {
             const projectile = new Projectile(
-                player.x, 
-                player.y, 
-                adjustedVx, 
-                adjustedVy, 
+                player.x,
+                player.y,
+                vx,
+                vy,
                 this.gameState.currentPlayer,
-                upgrades
+                { grapple: upgrades.grapple, teleport: upgrades.teleport }
             );
-            
             this.gameState.projectiles.push(projectile);
+
+            // Reset the one-time use upgrades
+            if (upgrades.grapple) playerState.upgrades.grapple = false;
+            if (upgrades.teleport) playerState.upgrades.teleport = false;
+        } else {
+            // Create projectile(s)
+            const projectileCount = upgrades.multiShot || 1;
+            
+            for (let i = 0; i < projectileCount; i++) {
+                const spread = projectileCount > 1 ? (i - (projectileCount - 1) / 2) * 0.1 : 0;
+                const adjustedAngle = this.currentAim.angle + spread;
+                const adjustedVx = Math.cos(adjustedAngle) * velocity;
+                const adjustedVy = Math.sin(adjustedAngle) * velocity;
+                
+                const projectile = new Projectile(
+                    player.x, 
+                    player.y, 
+                    adjustedVx, 
+                    adjustedVy, 
+                    this.gameState.currentPlayer,
+                    upgrades
+                );
+                
+                this.gameState.projectiles.push(projectile);
+            }
         }
         
         this.gameState.gamePhase = 'firing';
@@ -118,7 +137,7 @@ class Game {
             const collision = projectile.checkCollision(this.terrain, this.players);
             if (collision) {
                 const explosion = projectile.explode();
-                this.handleExplosion(explosion);
+                this.handleExplosion(explosion, projectile.owner);
                 return false;
             }
             
@@ -126,48 +145,53 @@ class Game {
         });
     }
     
-    handleExplosion(explosion) {
-        // Visual explosion effect
-        this.explosions.push({
-            x: explosion.x,
-            y: explosion.y,
-            radius: explosion.radius,
-            age: 0,
-            maxAge: 30
-        });
-        
-        // Apply damage and terrain destruction
-        const damageResults = ExplosionSystem.createExplosion(
-            explosion.x, 
-            explosion.y, 
-            explosion.radius, 
-            explosion.damage, 
-            this.terrain, 
-            this.players
-        );
-        
-        // Apply damage to game state
-        damageResults.forEach(result => {
-            this.gameState.takeDamage(result.playerId, result.damage);
-        });
-        
-        // Handle cluster bombs
-        if (explosion.cluster > 0) {
-            const clusterExplosions = ExplosionSystem.createClusterExplosions(
+    handleExplosion(explosion, ownerId) {
+        if (explosion.grapple || explosion.teleport) {
+            const playerToMove = this.players[ownerId];
+            playerToMove.moveTo(explosion.x);
+        } else {
+            // Visual explosion effect
+            this.explosions.push({
+                x: explosion.x,
+                y: explosion.y,
+                radius: explosion.radius,
+                age: 0,
+                maxAge: 30
+            });
+            
+            // Apply damage and terrain destruction
+            const damageResults = ExplosionSystem.createExplosion(
                 explosion.x, 
                 explosion.y, 
-                explosion.cluster, 
+                explosion.radius, 
                 explosion.damage, 
                 this.terrain, 
                 this.players
             );
             
-            // Add delayed cluster explosions
-            clusterExplosions.forEach((cluster, index) => {
-                setTimeout(() => {
-                    this.handleExplosion(cluster);
-                }, cluster.delay);
+            // Apply damage to game state
+            damageResults.forEach(result => {
+                this.gameState.takeDamage(result.playerId, result.damage);
             });
+            
+            // Handle cluster bombs
+            if (explosion.cluster > 0) {
+                const clusterExplosions = ExplosionSystem.createClusterExplosions(
+                    explosion.x, 
+                    explosion.y, 
+                    explosion.cluster, 
+                    explosion.damage, 
+                    this.terrain, 
+                    this.players
+                );
+                
+                // Add delayed cluster explosions
+                clusterExplosions.forEach((cluster, index) => {
+                    setTimeout(() => {
+                        this.handleExplosion(cluster, ownerId);
+                    }, cluster.delay);
+                });
+            }
         }
     }
     

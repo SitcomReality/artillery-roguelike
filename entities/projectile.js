@@ -46,6 +46,11 @@ export class Projectile {
             }
             return { type: 'terrain', x: this.x, y: this.y };
         }
+
+        const isSpecialShot = this.upgrades.grapple || this.upgrades.teleport;
+
+        // Special shots don't collide with players mid-air
+        if(isSpecialShot) return null;
         
         // Check player collision
         for (const player of players) {
@@ -68,6 +73,18 @@ export class Projectile {
     
     explode() {
         this.active = false;
+        
+        if (this.upgrades.grapple || this.upgrades.teleport) {
+            return {
+                x: this.x,
+                y: this.y,
+                grapple: this.upgrades.grapple,
+                teleport: this.upgrades.teleport,
+                radius: 10, // Small visual indicator maybe?
+                damage: 0
+            };
+        }
+
         return {
             x: this.x,
             y: this.y,
