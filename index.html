@@ -122,7 +122,8 @@
             height: 3px;
             background: rgba(255, 255, 0, 0.9);
             transform-origin: left center;
-            transform: rotate(0) translateY(-50%);
+            transform: rotate(var(--aim-angle, 0deg)) translateY(-50%);
+            transition: transform 0.1s ease-out;
         }
         
         .power-indicator {

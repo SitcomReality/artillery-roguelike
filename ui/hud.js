@@ -13,10 +13,7 @@ export class HUD {
         this.p1Power = document.getElementById('p1Power');
         this.p2Angle = document.getElementById('p2Angle');
         this.p2Power = document.getElementById('p2Power');
-        this.powerFill = {
-            0: this.p1Power.querySelector('.power-fill'),
-            1: this.p2Power.querySelector('.power-fill')
-        };
+        this.powerFill = {};
     }
     
     updatePlayerStatus(gameState) {
@@ -49,11 +46,13 @@ export class HUD {
         }
         
         // Update gauge
-        this.powerFill[playerId].style.width = `${power}%`;
+        if (this.powerFill[playerId]) {
+            this.powerFill[playerId].style.width = `${power}%`;
+        }
         
         // Rotate angle indicator
         const angleDeg = angle * 180 / Math.PI;
-        angleIndicator.querySelector('::after').style.transform = `rotate(${angleDeg}deg) translateY(-50%)`;
+        angleIndicator.style.setProperty('--aim-angle', `${angleDeg}deg`);
     }
     
     hideAimingInfo() {
